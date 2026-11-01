@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Management | Inventory Control</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<main class="container">
+
+    <!-- Header -->
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">INVENTORY CONTROL</p>
+            <h1>Stock Management</h1>
+            <p>Record incoming and outgoing product stock.</p>
+        </div>
+
+        <a href="{{ url_for('home') }}" class="supplier-button">
+            ← Back to Dashboard
+        </a>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="dashboard-navigation" style="margin-bottom:25px;">
+        <a href="{{ url_for('home') }}" class="supplier-button">Dashboard</a>
+        <a href="{{ url_for('suppliers') }}" class="supplier-button">Suppliers</a>
+        <a href="{{ url_for('stock_movement') }}" class="supplier-button">Stock Management</a>
+        <a href="{{ url_for('stock_history') }}" class="supplier-button">Stock History</a>
+        <a href="{{ url_for('reports') }}" class="supplier-button">Reports</a>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Stock Movement Form -->
+    <section class="panel">
+
+        <h2>Record Stock Movement</h2>
+
+        <form
+            method="POST"
+            action="{{ url_for('stock_movement') }}"
+            class="stock-form">
+
+            <label>
+                Select Product
+
+                <select name="product_id" required>
+                    <option value="">Choose Product</option>
+
+                    {% for product in products %}
+                        <option value="{{ product['product_id'] }}">
+                            {{ product['name'] }}
+                            ({{ product['sku'] }})
+                            - Available: {{ product['quantity'] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label>
+                Movement Type
+
+                <select name="movement_type" required>
+                    <option value="IN">Stock In (+)</option>
+                    <option value="OUT">Stock Out (-)</option>
+                </select>
+            </label>
+
+            <label>
+                Quantity
+
+                <input
+                    type="number"
+                    name="quantity"
+                    min="1"
+                    step="1"
+                    placeholder="Enter quantity"
+                    required>
+            </label>
+
+            <label>
+                Transaction Notes
+
+                <input
+                    type="text"
+                    name="notes"
+                    maxlength="250"
+                    placeholder="e.g. New stock received">
+            </label>
+
+            <button type="submit">
+                Record Stock Movement →
+            </button>
+
+        </form>
+
+    </section>
+
+    <!-- Information -->
+    <section class="panel">
+
+        <h2>Stock Movement Information</h2>
+
+        <div class="stats">
+
+            <article class="stat-card">
+                <p>Stock In</p>
+                <h2 style="color:#16a34a;">+ IN</h2>
+                <p>Increases available inventory.</p>
+            </article>
+
+            <article class="stat-card">
+                <p>Stock Out</p>
+                <h2 style="color:#dc2626;">− OUT</h2>
+                <p>Reduces available inventory.</p>
+            </article>
+
+            <article class="stat-card">
+                <p>Transaction History</p>
+                <h2 style="font-size:20px;">Track</h2>
+                <p>Every movement is recorded.</p>
+            </article>
+
+        </div>
+
+        <a href="{{ url_for('stock_history') }}" class="supplier-button">
+            View Stock Movement History →
+        </a>
+
+    </section>
+
+</main>
+
+</body>
+</html>

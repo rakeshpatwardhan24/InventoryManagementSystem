@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock History | Inventory Control</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<main class="container">
+
+    <!-- Header -->
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">INVENTORY CONTROL</p>
+            <h1>Stock Movement History</h1>
+            <p>View and filter all incoming and outgoing stock transactions.</p>
+        </div>
+
+        <a href="{{ url_for('home') }}" class="supplier-button">
+            ← Back to Dashboard
+        </a>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="dashboard-navigation" style="margin-bottom:25px;">
+        <a href="{{ url_for('home') }}" class="supplier-button">Dashboard</a>
+        <a href="{{ url_for('suppliers') }}" class="supplier-button">Suppliers</a>
+        <a href="{{ url_for('stock_movement') }}" class="supplier-button">Stock Management</a>
+        <a href="{{ url_for('stock_history') }}" class="supplier-button">Stock History</a>
+        <a href="{{ url_for('reports') }}" class="supplier-button">Reports</a>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Date Filters -->
+    <section class="panel">
+
+        <h2>Filter Transactions by Date</h2>
+
+        <form method="GET"
+              action="{{ url_for('stock_history') }}"
+              class="filter-form">
+
+            <label>
+                From Date
+                <input
+                    type="date"
+                    name="start_date"
+                    value="{{ start_date }}">
+            </label>
+
+            <label>
+                To Date
+                <input
+                    type="date"
+                    name="end_date"
+                    value="{{ end_date }}">
+            </label>
+
+            <button type="submit">Apply Filter</button>
+
+            <a href="{{ url_for('stock_history') }}">Clear Filter</a>
+
+        </form>
+
+    </section>
+
+    <!-- Transaction History -->
+    <section class="panel">
+
+        <h2>Transaction Records</h2>
+
+        {% if movements %}
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Movement Type</th>
+                            <th>Quantity</th>
+                            <th>Notes</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for movement in movements %}
+
+                        <tr>
+
+                            <td>
+                                <strong>{{ movement['name'] }}</strong>
+                            </td>
+
+                            <td>{{ movement['sku'] }}</td>
+
+                            <td>
+                                {% if movement['movement_type'] == 'IN' %}
+                                    <span class="in-stock">Stock In</span>
+                                {% else %}
+                                    <span class="low-stock">Stock Out</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if movement['movement_type'] == 'IN' %}
+                                    <strong style="color:#16a34a;">
+                                        +{{ movement['quantity'] }}
+                                    </strong>
+                                {% else %}
+                                    <strong style="color:#dc2626;">
+                                        -{{ movement['quantity'] }}
+                                    </strong>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ movement['notes'] or '-' }}</td>
+
+                            <td>{{ movement['created_at'] }}</td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p class="empty-state">
+                No stock transactions found for the selected dates.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+    <p style="text-align:center;color:#64748b;font-size:12px;margin:25px 0;">
+        Inventory Management System | © 2026
+    </p>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Control | Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+
+    <main class="auth-container">
+
+        <section class="auth-brand">
+            <div class="auth-logo">I</div>
+            <p class="eyebrow">INVENTORY CONTROL SYSTEM</p>
+            <h1>Manage your inventory with confidence.</h1>
+            <p class="auth-description">
+                Track products, manage suppliers, monitor stock movements,
+                and generate inventory reports from one place.
+            </p>
+            <div class="auth-features">
+                <p>✓ Product and supplier management</p>
+                <p>✓ Real-time stock tracking</p>
+                <p>✓ Reports and analytics</p>
+                <p>✓ Secure administrator access</p>
+            </div>
+        </section>
+
+        <section class="auth-form-section">
+
+            <div class="auth-form-card">
+
+                <div class="auth-heading">
+                    <p class="eyebrow">WELCOME</p>
+
+                    {% if setup_mode %}
+                        <h2>Create Administrator</h2>
+                        <p>Set up your account to secure your inventory.</p>
+                    {% else %}
+                        <h2>Welcome Back</h2>
+                        <p>Sign in to access your dashboard.</p>
+                    {% endif %}
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="message {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% if setup_mode %}
+                    <form method="POST" action="{{ url_for('setup') }}" class="auth-form">
+
+                        <label>
+                            Username
+                            <input
+                                type="text"
+                                name="username"
+                                placeholder="Create username"
+                                minlength="3"
+                                maxlength="80"
+                                required
+                                autocomplete="username">
+                        </label>
+
+                        <label>
+                            Password
+                            <input
+                                type="password"
+                                name="password"
+                                placeholder="Minimum 8 characters"
+                                minlength="8"
+                                required
+                                autocomplete="new-password">
+                        </label>
+
+                        <label>
+                            Confirm Password
+                            <input
+                                type="password"
+                                name="confirm_password"
+                                placeholder="Enter password again"
+                                minlength="8"
+                                required
+                                autocomplete="new-password">
+                        </label>
+
+                        <button type="submit" class="auth-submit">
+                            Create Account →
+                        </button>
+
+                    </form>
+
+                {% else %}
+                    <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+
+                        <label>
+                            Username
+                            <input
+                                type="text"
+                                name="username"
+                                placeholder="Enter your username"
+                                required
+                                autocomplete="username">
+                        </label>
+
+                        <label>
+                            Password
+                            <input
+                                type="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                required
+                                autocomplete="current-password">
+                        </label>
+
+                        <button type="submit" class="auth-submit">
+                            Sign In →
+                        </button>
+
+                    </form>
+                {% endif %}
+
+                <p class="auth-footer">
+                    Inventory Management System
+                    <span>© 2026</span>
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

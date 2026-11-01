@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Inventory Control</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<main class="container">
+
+    <!-- Dashboard Header -->
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">INVENTORY CONTROL SYSTEM</p>
+            <h1>Dashboard</h1>
+            <p>Welcome, {{ session.get('username', 'Administrator') }}! Here's your inventory overview.</p>
+        </div>
+
+        <div class="dashboard-navigation">
+            <span class="status">System Online</span>
+            <a href="{{ url_for('logout') }}" class="supplier-button">
+                Logout
+            </a>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="dashboard-navigation" style="margin-bottom: 25px;">
+        <a href="{{ url_for('home') }}" class="supplier-button">Dashboard</a>
+        <a href="{{ url_for('suppliers') }}" class="supplier-button">Suppliers</a>
+        <a href="{{ url_for('stock_movement') }}" class="supplier-button">Stock Management</a>
+        <a href="{{ url_for('stock_history') }}" class="supplier-button">Stock History</a>
+        <a href="{{ url_for('reports') }}" class="supplier-button">Reports & Analytics</a>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Statistics -->
+    <section class="stats">
+
+        <article class="stat-card">
+            <p>Total Products</p>
+            <h2>{{ total_products }}</h2>
+        </article>
+
+        <article class="stat-card">
+            <p>Total Units in Stock</p>
+            <h2>{{ total_units }}</h2>
+        </article>
+
+        <article class="stat-card">
+            <p>Low-Stock Products</p>
+            <h2>{{ low_stock }}</h2>
+        </article>
+
+    </section>
+
+    <!-- Add Product -->
+    <section class="panel">
+
+        <h2>+ Add New Product</h2>
+
+        <form action="{{ url_for('add_product') }}"
+              method="POST"
+              class="product-form">
+
+            <label>
+                SKU / Product Code
+                <input
+                    type="text"
+                    name="sku"
+                    required
+                    maxlength="50"
+                    placeholder="e.g. ELEC-001">
+            </label>
+
+            <label>
+                Product Name
+                <input
+                    type="text"
+                    name="name"
+                    required
+                    maxlength="120"
+                    placeholder="e.g. Wireless Mouse">
+            </label>
+
+            <label>
+                Category
+                <input
+                    type="text"
+                    name="category"
+                    required
+                    maxlength="80"
+                    placeholder="e.g. Electronics">
+            </label>
+
+            <label>
+                Supplier
+                <select name="supplier_id">
+                    <option value="">No Supplier Selected</option>
+
+                    {% for supplier in suppliers %}
+                        <option value="{{ supplier['supplier_id'] }}">
+                            {{ supplier['name'] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label>
+                Unit Price (₹)
+                <input
+                    type="number"
+                    name="price"
+                    min="0"
+                    step="0.01"
+                    required
+                    placeholder="499.00">
+            </label>
+
+            <label>
+                Quantity
+                <input
+                    type="number"
+                    name="quantity"
+                    min="0"
+                    step="1"
+                    required
+                    placeholder="20">
+            </label>
+
+            <label>
+                Low-Stock Alert Level
+                <input
+                    type="number"
+                    name="reorder_level"
+                    min="0"
+                    step="1"
+                    value="5"
+                    required>
+            </label>
+
+            <button type="submit">Add Product +</button>
+
+        </form>
+
+    </section>
+
+    <!-- Product Inventory -->
+    <section class="panel">
+
+        <h2>Product Inventory</h2>
+
+        <form method="GET"
+              action="{{ url_for('home') }}"
+              class="search-form">
+
+            <input
+                type="text"
+                name="search"
+                placeholder="Search by product name or SKU..."
+                value="{{ search_query }}">
+
+            <button type="submit">Search</button>
+
+            <a href="{{ url_for('home') }}">Clear</a>
+
+        </form>
+
+        {% if products %}
+
+            <div class="table-wrapper">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Stock Status</th>
+                            <th>Supplier</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for product in products %}
+
+                        <tr>
+                            <td>{{ product["sku"] }}</td>
+
+                            <td><strong>{{ product["name"] }}</strong></td>
+
+                            <td>{{ product["category"] }}</td>
+
+                            <td>₹{{ "%.2f"|format(product["price"]) }}</td>
+
+                            <td>{{ product["quantity"] }}</td>
+
+                            <td>
+                                {% if product["quantity"] <= product["reorder_level"] %}
+                                    <span class="low-stock">Low Stock</span>
+                                {% else %}
+                                    <span class="in-stock">In Stock</span>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ product["supplier_name"] or "-" }}</td>
+
+                            <td>
+                                <a
+                                    href="{{ url_for('edit_product', product_id=product['product_id']) }}"
+                                    class="edit-button">
+                                    Edit
+                                </a>
+
+                                <form
+                                    action="{{ url_for('delete_product', product_id=product['product_id']) }}"
+                                    method="POST"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Are you sure you want to delete this product?');">
+
+                                    <button
+                                        type="submit"
+                                        class="delete-button">
+                                        Delete
+                                    </button>
+
+                                </form>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p class="empty-state">
+                No products found. Add a new product or try another search.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+    <p style="text-align:center; color:#64748b; font-size:12px; margin:25px 0;">
+        Inventory Management System | © 2026
+    </p>
+
+</main>
+
+</body>
+</html>

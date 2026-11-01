@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Supplier | Inventory Control</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<main class="container">
+
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">INVENTORY CONTROL</p>
+            <h1>Edit Supplier</h1>
+            <p>Update supplier contact and business information.</p>
+        </div>
+
+        <a href="{{ url_for('suppliers') }}" class="supplier-button">
+            ← Back to Suppliers
+        </a>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <section class="panel">
+
+        <h2>Supplier Details</h2>
+
+        <form
+            action="{{ url_for('update_supplier', supplier_id=supplier['supplier_id']) }}"
+            method="POST"
+            class="product-form">
+
+            <label>
+                Supplier Name
+                <input
+                    type="text"
+                    name="name"
+                    value="{{ supplier['name'] }}"
+                    required
+                    maxlength="120">
+            </label>
+
+            <label>
+                Email Address
+                <input
+                    type="email"
+                    name="email"
+                    value="{{ supplier['email'] or '' }}"
+                    maxlength="120">
+            </label>
+
+            <label>
+                Phone Number
+                <input
+                    type="tel"
+                    name="phone"
+                    value="{{ supplier['phone'] or '' }}"
+                    maxlength="20">
+            </label>
+
+            <label>
+                Address
+                <input
+                    type="text"
+                    name="address"
+                    value="{{ supplier['address'] or '' }}"
+                    maxlength="250">
+            </label>
+
+            <button type="submit">Save Changes</button>
+
+            <a href="{{ url_for('suppliers') }}" class="supplier-button">
+                Cancel
+            </a>
+
+        </form>
+
+    </section>
+
+</main>
+
+</body>
+</html>
